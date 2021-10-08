@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "406402958976",
+    "project_id": "claroappdemo-733e8",
+    "storage_bucket": "claroappdemo-733e8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406402958976:android:8c1809926d576605fc8865",
+        "android_client_info": {
+          "package_name": "com.brandovidal.claroappdemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "406402958976-eal2dmb28qadivqn0j9hssah6g2kvmcl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDWMuvMAm8rCKe10o0erOkLSXS8CoO_Xc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "406402958976-eal2dmb28qadivqn0j9hssah6g2kvmcl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
