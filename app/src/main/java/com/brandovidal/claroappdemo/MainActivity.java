@@ -71,7 +71,12 @@ public class MainActivity extends AppCompatActivity {
     }
     
     void loadJS(WebView webView) {
-        String injection = "javascript: document.querySelector('h1.entry-title').style.color = 'green'; window.localStorage.setItem('is-java-native', 'true');";
+        String injection =
+                "javascript: var title = document.querySelector('h1.entry-title');" +
+                "title.style.color = 'green';" +
+                "title.addEventListener('click', function() { Android.showToast('inject code from java'); });"+
+                "window.localStorage.setItem('is-java-native', 'true');"
+                ;
         webView.evaluateJavascript(injection, null);
 //        webView.loadUrl(injection);
     }
