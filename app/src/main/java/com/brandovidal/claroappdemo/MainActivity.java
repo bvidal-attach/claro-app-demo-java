@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetJavaScriptEnabled")
     void setWebView() {
         // Define URL
-        String URL = "https://www.pythontutorial.net";
+        String URL = "https://bvidal-attach.github.io/mi-claro-web-demo";
 
         // Define WebView
         WebView webView = (WebView) findViewById(R.id.webview);
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
-                loadJS(webView);
+//                loadJS(webView);
             }
         };
 
@@ -63,9 +63,7 @@ public class MainActivity extends AppCompatActivity {
         // Load view
         webView.loadUrl(URL);
 
-        // add JavaScript
-        // webView.addJavascriptInterface(new WebAppInterface(this), "Android");
-
+        // implement javascript events
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             webView.addJavascriptInterface(new AnalyticsWebInterface(this), AnalyticsWebInterface.TAG);
         } else {
