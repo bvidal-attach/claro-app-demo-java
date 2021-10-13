@@ -5,13 +5,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
     // Initialize analytics
@@ -22,7 +30,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // cargar webview
         setWebView();
+
+        // Vista de pantalla
+        screenView();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -52,31 +64,75 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl(URL);
 
         // add JavaScript
-        webView.addJavascriptInterface(new WebAppInterface(this), "Android");
-    }
+        // webView.addJavascriptInterface(new WebAppInterface(this), "Android");
 
-    public static class WebAppInterface {
-        Context mContext;
-
-        /** Instantiate the interface and set the context */
-        WebAppInterface(Context c) {
-            mContext = c;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            webView.addJavascriptInterface(new AnalyticsWebInterface(this), AnalyticsWebInterface.TAG);
+        } else {
+            Log.w("JavaScriptInterface", "Not adding JavaScriptInterface, API Version: " + Build.VERSION.SDK_INT);
         }
 
-        /** Show a toast from the web page */
+    }
+
+    public class AnalyticsWebInterface {
+        public static final String TAG = "AnalyticsWebInterface";
+        private FirebaseAnalytics mAnalytics;
+
+        public AnalyticsWebInterface(Context context) {
+            mAnalytics = FirebaseAnalytics.getInstance(context);
+        }
+
+        // Instrucciones para convertir JSON a Android bundle
+        private Bundle bundleFromJson(String json) {
+            try {
+                JSONObject jsonObject = toJsonObject(json);
+                return jsonToBundle(jsonObject);
+            } catch (JSONException ignored) {
+
+            }
+            return null;
+        }
+
+        private JSONObject toJsonObject(String jsonString) throws JSONException {
+            return new JSONObject(jsonString);
+        }
+
+        private Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
+            Bundle bundle = new Bundle();
+            Iterator iter = jsonObject.keys();
+
+            while (iter.hasNext()) {
+                String key = (String) iter.next();
+                String value = jsonObject.getString(key);
+                bundle.putString(key, value);
+            }
+            return bundle;
+        }
+
         @JavascriptInterface
-        public void showToast(String toast) {
-            Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+        public void logEvent(String name, String jsonParams) {
+            Bundle _bundleFromJson = bundleFromJson(jsonParams);
+            Log.d("_bundleFromJson", "_bundleFromJson: " + _bundleFromJson);
+            mAnalytics.logEvent(name, _bundleFromJson);
+        }
+
+        @JavascriptInterface
+        public void setUserProperty(String name, String value) {
+            mAnalytics.setUserProperty(name, value);
         }
     }
-    
+
     void loadJS(WebView webView) {
-        String injection =
-                "javascript: var title = document.querySelector('h1.entry-title');" +
-                "title.style.color = 'green';" +
-                "title.addEventListener('click', function() { Android.showToast('inject code from java'); });"+
-                "window.localStorage.setItem('is-java-native', 'true');"
-                ;
+//        String params = "{ 'event_category': 'home', 'event_action': 'click', 'event_label': 'titulo' }";
+        String params = "{ \"event_category\" : \"home\", \"event_action\": \"click\", \"event_label\": \"titulo de la pagina\" }";
+
+        String injection = "var title = document.querySelector('h1.entry-title');" +
+            "title.innerHTML = 'Custom Event Analytics';" +
+            "title.addEventListener('click', function() { " +
+                "AnalyticsWebInterface.logEvent('custom_event_click', '" + params + "'); " +
+//                "title.style.color = 'green';"+
+            "});" +
+            "window.localStorage.setItem('is-java-native', 'true');";
         webView.evaluateJavascript(injection, null);
 //        webView.loadUrl(injection);
     }
